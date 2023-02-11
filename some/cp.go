@@ -2,7 +2,7 @@ package some
 
 import (
 	"errors"
-	"github.com/laher/someutils"
+	"github.com/nuvolaris/someutils"
 	"github.com/laher/uggo"
 	"io"
 	"os"

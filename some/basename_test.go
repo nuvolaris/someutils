@@ -1,7 +1,7 @@
 package some
 
 import (
-	"github.com/laher/someutils"
+	"github.com/nuvolaris/someutils"
 	"strings"
 	"testing"
 )

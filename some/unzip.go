@@ -4,7 +4,7 @@ import (
 	"archive/zip"
 	"errors"
 	"fmt"
-	"github.com/laher/someutils"
+	"github.com/nuvolaris/someutils"
 	"github.com/laher/uggo"
 	"io"
 	"os"

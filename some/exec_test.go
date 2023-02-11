@@ -2,7 +2,7 @@ package some
 
 import (
 	"fmt"
-	"github.com/laher/someutils"
+	"github.com/nuvolaris/someutils"
 	"strings"
 	"testing"
 	"time"
