@@ -31,3 +31,6 @@ test.json
 test
 *.tar
 *.zip
+
+.git-hooks/
+.vscode/

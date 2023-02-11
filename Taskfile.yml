@@ -1,0 +1,6 @@
+version: '3'
+
+tasks:
+  default: go build -o test cmd/some/main.go 
+
+  clean: go clean -cache -modcache
