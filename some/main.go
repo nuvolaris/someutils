@@ -12,7 +12,7 @@ func IsBuiltin(name string) bool {
 		"grep", "gunzip", "gzip", "head",
 		"ls", "mv", "pwd", "rm", "sleep",
 		"tail", "tar", "tee", "touch", "tr",
-		"unzip", "wc", "wget", "which", "zip":
+		"unzip", "wc", "which", "zip":
 		return true
 	}
 	return false
