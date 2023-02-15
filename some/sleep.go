@@ -2,11 +2,13 @@ package some
 
 import (
 	"errors"
-	"github.com/nuvolaris/someutils"
-	"github.com/laher/uggo"
+	"fmt"
 	"io"
 	"strconv"
 	"time"
+
+	"github.com/laher/uggo"
+	"github.com/nuvolaris/someutils"
 )
 
 func init() {
@@ -33,7 +35,11 @@ func (sleep *SomeSleep) ParseFlags(call []string, errPipe io.Writer) (error, int
 	if err != nil {
 		return err, code
 	}
-	arg := flagSet.Args()[0]
+	args := flagSet.Args()
+	if len(args) == 0 {
+		return fmt.Errorf("not enough arguments"), 1
+	}
+	arg := args[0]
 	last := arg[len(arg)-1:]
 	_, err = strconv.Atoi(last)
 	if err == nil {
