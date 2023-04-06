@@ -4,13 +4,14 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/nuvolaris/someutils"
-	"github.com/laher/uggo"
 	"io"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/laher/uggo"
+	"github.com/nuvolaris/someutils"
 )
 
 func init() {
@@ -93,15 +94,15 @@ func (grep *SomeGrep) Invoke(invocation *someutils.Invocation) (error, int) {
 			}
 			files = append(files, results...)
 		}
-		err = grepAll(reg, files, grep, invocation.MainPipe.Out)
-		if err != nil {
+		found, err := grepAll(reg, files, grep, invocation.MainPipe.Out)
+		if err != nil || !found {
 			return err, 1
 		}
 	} else {
 		if uggo.IsPipingStdin() {
 			//check STDIN
-			err = grepReader(invocation.MainPipe.In, "", reg, grep, invocation.MainPipe.Out)
-			if err != nil {
+			found, err := grepReader(invocation.MainPipe.In, "", reg, grep, invocation.MainPipe.Out)
+			if err != nil || !found {
 				return err, 1
 			}
 		} else {
@@ -112,11 +113,12 @@ func (grep *SomeGrep) Invoke(invocation *someutils.Invocation) (error, int) {
 	return nil, 0
 }
 
-func grepAll(reg *regexp.Regexp, files []string, grep *SomeGrep, out io.Writer) error {
+func grepAll(reg *regexp.Regexp, files []string, grep *SomeGrep, out io.Writer) (bool, error) {
+	found := false
 	for _, filename := range files {
 		fi, err := os.Stat(filename)
 		if err != nil {
-			return err
+			return found, err
 		}
 		if fi.IsDir() {
 			//recurse here
@@ -127,28 +129,30 @@ func grepAll(reg *regexp.Regexp, files []string, grep *SomeGrep, out io.Writer) 
 		}
 		file, err := os.Open(filename)
 		if err != nil {
-			return err
+			return found, err
 		}
 		defer file.Close()
-		err = grepReader(file, filename, reg, grep, out)
+		foundOne, err := grepReader(file, filename, reg, grep, out)
 		if err != nil {
-			return err
+			return found, err
 		}
 		err = file.Close()
 		if err != nil {
-			return err
+			return found, err
 		}
+		found = foundOne || found
 	}
-	return nil
+	return found, nil
 }
 
-func grepReader(file io.Reader, filename string, reg *regexp.Regexp, grep *SomeGrep, out io.Writer) error {
+func grepReader(file io.Reader, filename string, reg *regexp.Regexp, grep *SomeGrep, out io.Writer) (bool, error) {
+	found := false
 	scanner := bufio.NewScanner(file)
 	lineNumber := 1
 	for scanner.Scan() {
 		err := scanner.Err()
 		if err != nil {
-			return err
+			return found, err
 		}
 		line := scanner.Text()
 		candidate := line
@@ -157,6 +161,7 @@ func grepReader(file io.Reader, filename string, reg *regexp.Regexp, grep *SomeG
 		}
 		isMatch := reg.MatchString(candidate)
 		if (isMatch && !grep.IsInvertMatch) || (!isMatch && grep.IsInvertMatch) {
+			found = true
 			if grep.IsPrintFilename && filename != "" {
 				fmt.Fprintf(out, "%s:", filename)
 			}
@@ -167,7 +172,7 @@ func grepReader(file io.Reader, filename string, reg *regexp.Regexp, grep *SomeG
 		}
 		lineNumber += 1
 	}
-	return nil
+	return found, nil
 }
 
 func compile(pattern string, grep *SomeGrep) (*regexp.Regexp, error) {

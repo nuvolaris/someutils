@@ -20,11 +20,9 @@ func main() {
 	}
 	err, code := someutils.Call(os.Args[1], os.Args[1:])
 	if err != nil {
-		if code != 0 {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(code)
-		}
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 	}
+	os.Exit(code)
 }
 
 func showHelp(msg string) {
